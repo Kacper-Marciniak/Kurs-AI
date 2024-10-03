@@ -7,7 +7,7 @@
 
 **Prowadzący wykład:**\
 dr inż. Marek Mysior\
-pawel.majewski@pwr.edu.pl\
+marek.mysior@pwr.edu.pl\
 bud. B4 pok. 5.29
 
 **Prowadzący zajęcia projektowe:**\
