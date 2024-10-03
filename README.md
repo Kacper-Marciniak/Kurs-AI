@@ -6,9 +6,9 @@
 **Kod przedmiotu:** W10MTR-SM0019
 
 **Prowadzący wykład:**\
-mgr inż. Paweł Majewski\
+dr inż. Marek Mysior\
 pawel.majewski@pwr.edu.pl\
-bud. B4 pok. 3.40
+bud. B4 pok. 5.29
 
 **Prowadzący zajęcia projektowe:**\
 mgr inż. Kacper Marciniak\
