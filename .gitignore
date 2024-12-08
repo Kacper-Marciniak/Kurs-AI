@@ -1,2 +1,7 @@
 Prowadzacy
 Student/P5/data
+Student/P6/models
+Student/P6/*.pt
+Student/P6/*.jpg
+*.cache
+__pycache__
