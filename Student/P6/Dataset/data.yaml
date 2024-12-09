@@ -1,7 +1,0 @@
-names:
-- nakretka
-- sruba
-path: Dataset
-test: test
-train: train
-val: val
