@@ -12,7 +12,7 @@ from torchvision import transforms as T
 RESIZE = 256
 CROPSIZE = 224
 TRANSFORM = T.Compose([
-    T.Resize(RESIZE, Image.Resampling.LANCZOS),
+    T.Resize(RESIZE, Image.Resampling.BICUBIC),
     T.CenterCrop(CROPSIZE),
     T.ToTensor(),
     T.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])

@@ -19,18 +19,18 @@ def embedding_concat(x, y):
     for i in range(x.size(2)):
         z[:, :, i, :, :] = torch.cat((x[:, :, i, :, :], y), 1)
     del x, y
-    gc.collect()
-    torch.cuda.empty_cache()
     
     z = F.fold(z.view(B, -1, H2 * W2), kernel_size=s, output_size=(H1, W1), stride=s)
 
     return z
 
 def process_mask(mask, threshold):
+    heat_map = mask.copy() * 255
+
     mask[mask > threshold] = 1
     mask[mask <= threshold] = 0
     mask = morphology.opening(mask, morphology.disk(4)) * 255
-    return mask
+    return mask, heat_map
 
 def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):
     num = len(scores)
@@ -40,8 +40,7 @@ def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):
         img = test_img[i]
         img = denormalization(img)
         gt = gts[i].transpose(1, 2, 0).squeeze()
-        heat_map = scores[i] * 255
-        mask = process_mask(scores[i], threshold)
+        mask, heat_map = process_mask(scores[i], threshold)
         vis_img = mark_boundaries(img, mask, color=(1, 0, 0), mode='thick')
         fig_img, ax_img = plt.subplots(1, 5, figsize=(12, 3))
         fig_img.subplots_adjust(right=0.9)
@@ -77,7 +76,7 @@ def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):
         }
         cb.set_label('Anomaly Score', fontdict=font)
 
-        fig_img.savefig(os.path.join(save_dir, class_name + '_{}'.format(i)), dpi=100)
+        fig_img.savefig(os.path.join(save_dir, f'{class_name}_{i}'), dpi=100)
         plt.close()
 
 def denormalization(x):
