@@ -6,5 +6,7 @@ Student/P6/*.jpg
 Student/P7/dataset
 Student/P7/results
 Student/P7/*.tar.xz
+Student/P8/*.png
+Student/P8/*.pth
 *.cache
 __pycache__
