@@ -27,8 +27,8 @@ import matplotlib.pyplot as plt
 class Padim():
     transform = TRANSFORM
 
-    def __init__(self, arch: str, classname: str, save_path: str = 'results', threshold: float = 0.5):
-        self.arch = arch
+    def __init__(self, classname: str, save_path: str = 'results', threshold: float = 0.5):
+        self.arch = "resnet18"
         self.save_path = save_path
         self.class_name = classname
 
@@ -41,19 +41,16 @@ class Padim():
 
         self.train_weights = None
 
+        print(f"PADIM initialized for class: {self.class_name} with architecture: {self.arch}")
+
     def init_model(self):
         use_cuda = torch.cuda.is_available()
         self.device = torch.device('cuda' if use_cuda else 'cpu')
         
         # load model
-        if self.arch == 'resnet18':
-            self.model = resnet18(weights='DEFAULT', progress=True)
-            t_d = 448
-            d = 100
-        elif self.arch == 'wide_resnet50_2':
-            self.model = wide_resnet50_2(weights='DEFAULT', progress=True)
-            t_d = 1792
-            d = 550
+        self.model = resnet18(weights='DEFAULT', progress=True)
+        t_d = 448
+        d = 100
 
         # randomly reducing feature dimension to 100 or 550 for resnet18 and wide_resnet50_2, respectively
         self.random_idx = torch.tensor(sample(range(0, t_d), d))
@@ -87,7 +84,6 @@ class Padim():
         if self.train_weights is None:
             train_weights_filepath = os.path.join(self.save_path, f'train_{self.class_name}.npz')
             if os.path.exists(train_weights_filepath):
-                print(f"Loading train features for {self.class_name}")
                 data = np.load(train_weights_filepath)
                 self.train_weights = [data['mean'], data['cov_inv']]
                 self.random_idx = torch.tensor(data['random_idx'])
@@ -104,7 +100,6 @@ class Padim():
     def get_eval_data(self):
         eval_data_filepath = os.path.join(self.save_path, f'eval_{self.class_name}.npz')
         if os.path.exists(eval_data_filepath):
-            print(f"Loading evaluation data for {self.class_name}")
             data = np.load(eval_data_filepath)
             self.normalization_data = data['normalization_data']
             self.threshold = data['threshold']
@@ -117,7 +112,7 @@ class Padim():
 
         assert self.class_name == dataset.class_name, "Class names must be the same"
         
-        dataloader = DataLoader(dataset, batch_size=32, pin_memory=True, shuffle=shuffle)
+        dataloader = DataLoader(dataset, batch_size=32, shuffle=shuffle)
 
         embedding_vect = None
         anomaly_types = []
@@ -186,7 +181,7 @@ class Padim():
 
         assert self.class_name == test_dataset.class_name, "Class names must be the same"
         
-        test_dataloader = DataLoader(test_dataset, batch_size=32, pin_memory=True) 
+        test_dataloader = DataLoader(test_dataset, batch_size=32) 
         self.get_train_weights()
         
         gt_list = []
@@ -339,7 +334,6 @@ class Padim():
 
         preview_outputs = OrderedDict([('layer1', []), ('layer2', []), ('layer3', [])])
         
-        print("Extracting features")
         # extract test set features        
         x = self.transform(Image.fromarray(cv.cvtColor(image,cv.COLOR_BGR2RGB))).unsqueeze(0) # unsqueeze to add dummy batch dimension
         # model prediction
@@ -363,7 +357,6 @@ class Padim():
         embedding_vect = torch.index_select(embedding_vect, 1, self.random_idx)
             
         # calculate distance matrix
-        print("Calculating distance matrix")
         B, C, H, W = embedding_vect.size()
         embedding_vect = embedding_vect.view(B, C, H * W).numpy()
         dist_list = []
@@ -376,7 +369,6 @@ class Padim():
         dist_list = np.array(dist_list).transpose(1, 0).reshape(B, H, W)
 
         # upsample        
-        print("Generating score map")
         dist_list = torch.tensor(dist_list)
         score_map = F.interpolate(dist_list.unsqueeze(1), size=x.size(2), mode='bilinear',
                                     align_corners=False).squeeze().numpy()
